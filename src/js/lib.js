@@ -77,11 +77,10 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
                return _.map(participants,
                            function(p) {
                                return {
-                                   participant_id: p.person.id,
-                                   hangout_id: window.gapi.hangout.getHangoutId(),
+                                   participant: p.person.id,
+                                   meeting: window.gapi.hangout.getHangoutId(),
                                    name: p.person.displayName,
                                    locale: p.locale,
-                                   image_url: p.person.image.url
                                };
                            });
            }
@@ -100,16 +99,14 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
 
                volumeCollector.onParticipantsChanged(window.gapi.hangout.getParticipants());
                
-               socket.emit("hangout::joined",
+               socket.emit("meetingJoined",
                            {
-                               participant_id: localParticipant.person.id,
-                               participant_name: localParticipant.person.displayName,
+                               participant: localParticipant.person.id,
+                               name: localParticipant.person.displayName,
                                participant_locale: localParticipant.locale,
-                               participant_image: localParticipant.person.image.url,
-                               hangout_participants: participants,
-                               hangout_id: thisHangout.getHangoutId(),
-                               hangout_url: thisHangout.getHangoutUrl(),
-                               hangout_topic: thisHangout.getTopic()
+                               participants: participants,
+                               meeting: thisHangout.getHangoutId(),
+                               meetingTopic: thisHangout.getTopic()
                            });
 
                // the only other thing sent to maybe_start_heartbeat
@@ -175,7 +172,7 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
                    console.log("sending:", currentParticipants);
                    socket.emit("participantsChanged",
                                {
-                                   hangout_id: window.gapi.hangout.getHangoutId(),
+                                   meeting: window.gapi.hangout.getHangoutId(),
                                    participants: currentParticipants
                                });
                });

@@ -137,12 +137,12 @@ define(["feathers", "socketio", "underscore", 'underscore_string'], function(fea
                 return;
             }
 
-            socket.emit("talking_history::create", 
+            socket.emit("utterance::create", 
                         {
-                            'participant_id': participantId,
-                            'hangout_id': window.gapi.hangout.getHangoutId(),
-                            'start_time': new Date(startTime).toISOString(),
-                            'end_time': new Date(endTime).toISOString()
+                            'participant': participantId,
+                            'meeting': window.gapi.hangout.getHangoutId(),
+                            'startTime': new Date(startTime).toISOString(),
+                            'endTime': new Date(endTime).toISOString()
                             //'volumes': volumeData  // comment to not collect raw data
                         },
                         {},

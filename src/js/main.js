@@ -6,7 +6,6 @@
 // (`gapi` itself is now of type `undefined`, see
 // http://stackoverflow.com/questions/14587720/using-requirejs-alongside-non-amd-javascript-files)
 
-
 // Main RequireJS Config
 requirejs.config({
     baseUrl: serverUrl + '/plugin/src/',

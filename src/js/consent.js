@@ -60,8 +60,8 @@ define(["jquery", "feathers", "socketio", "underscore"], function($, feathers, i
         console.log("getting participant info for:", participant_id, hangout_id);
         participantService.find(
             {query:
-             {$and: [{participant_id: participant_id},
-                     {hangout_id: hangout_id}
+             {$and: [{_id: participant_id},
+                     {meeting: hangout_id}
                     ]
              }
             },

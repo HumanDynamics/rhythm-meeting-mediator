@@ -11,8 +11,8 @@ define(["underscore"], function(underscore) {
     function send_heartbeat() {
         _socket.emit("heartbeat-start",
                      {
-                         hangout_id: window.gapi.hangout.getHangoutId(),
-                         participant_id: window.gapi.hangout.getLocalParticipant().person.id
+                         meeting: window.gapi.hangout.getHangoutId(),
+                         participant: window.gapi.hangout.getLocalParticipant().person.id
                      });
     }
 
@@ -28,8 +28,8 @@ define(["underscore"], function(underscore) {
         console.log("stopping the heartbeat...");
         _socket.emit('heartbeat-stop',
                     {
-                        hangout_id: window.gapi.hangout.getHangoutId(),
-                        participant_id: window.gapi.hangout.getLocalParticipant().person.id
+                        heartbeat: window.gapi.hangout.getHangoutId(),
+                        participant: window.gapi.hangout.getLocalParticipant().person.id
                     });
     }
 

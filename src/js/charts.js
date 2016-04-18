@@ -1,38 +1,5 @@
 define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", "underscore", "underscore_string"], function(pieChart, MM, feathers, _, s) {
 
-    var pie_chart = null;
-    var pie_chart_width = 300;
-    var pie_chart_height = 300;
-
-    // updates the pie chart with data!
-    function maybe_update_pie_chart(data) {
-        console.log("Maybe updating pie chart with data:", data);
-        if (data.hangout_id == window.gapi.hangout.getHangoutId()) {
-            if (pie_chart.loading) {
-                // have to call loadData before on change.
-                pie_chart.loadData(data.talk_times);
-            } else {
-                pie_chart.change(data.talk_times);
-            }
-        }
-    }
-
-    function start_pie_chart(socket) {
-        var app = feathers().configure(feathers.socketio(socket));
-        var talktimes = app.service('talk_times');
-        
-        var local_participant = window.gapi.hangout.getLocalParticipant().person.id;
-
-        // use this for when you first create the pie chart
-        var fake_data = [{'participant_id': local_participant, 'seconds_spoken': 1}];
-        pie_chart = new pieChart(fake_data, local_participant, pie_chart_width, pie_chart_height);
-        pie_chart.render('#pie-chart');
-        
-        // update the pie chart when we get new talk times
-        talktimes.on("created", maybe_update_pie_chart);
-    }
-
-///////////////////////////////////////////////////////////
     var mm = null;
     var mm_width = 300;
     var mm_height = 300;
@@ -62,7 +29,6 @@ define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", 
         console.log("mm data:", data);
         if (data.hangout_id == window.gapi.hangout.getHangoutId()) {
             mm.updateData({participants: mm.data.participants,
-                           initials: mm.data.initials,
                            transitions: data.transitions,
                            turns: transform_turns(mm.data.participants, data.turns)});
         } else {
@@ -100,19 +66,16 @@ define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", 
         var app = feathers().configure(feathers.socketio(socket));
         
         var turns = app.service('turns');
-        var hangouts = app.service('hangouts');
+        var meetings = app.service('meetings');
 
-        hangouts.find({ query:
-                        {
-                            hangout_id: window.gapi.hangout.getHangoutId()
-                        }
-                      },
-                      function(error, foundhangouts) {
+        
+
+      hangouts.get(window.gapi.hangout.getHangoutId(),
+                      function(error, meeting) {
                           if (error) {
                           } else {
-                              console.log("MM viz found hangout:", foundhangouts[0]);
-                              mm = new MM({participants: foundhangouts[0].participants,
-                                           initials: get_participant_initials(foundhangouts[0].participants),
+                              console.log("MM viz found meeting:", meeting);
+                              mm = new MM({participants: meeting.participants,
                                            transitions: 0,
                                            turns: []},
                                           window.gapi.hangout.getLocalParticipant().person.id,
@@ -120,7 +83,7 @@ define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", 
                                           mm_height);
                               mm.render('#meeting-mediator');
                               turns.on("created", maybe_update_mm_turns);
-                              hangouts.on("patched", maybe_update_mm_participants);
+                              meetings.on("patched", maybe_update_mm_participants);
                           }
                       }
                      );

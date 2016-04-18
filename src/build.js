@@ -5,31 +5,22 @@
 // Install `swig`, `fs`, and `concat-files` locally through NPM,
 // and then run build.js.
 
-var swig  = require('swig'),
-    fs = require('fs'),
-    concat = require('concat-files');
-
-///////////////////////////////////
-// Read Config File
-var configFile = fs.readFileSync("../../config.json");
-var configObj = JSON.parse(configFile);
+const swig = require('swig')
+const fs = require('fs')
+const concat = require('concat-files')
 
 // Generate index.html template
-var template = swig.compileFile('./index.template');
+var template = swig.compileFile('./index.template')
 var output = template({
-    serverUrl: configObj.serverUrl,
-});
+  serverUrl: 'https://breakout-dev.media.mit.edu'
+})
 
-fs.writeFile('index.tmp', output);
-
-var header = fs.readFileSync('../header.xml');
-var footer = fs.readFileSync('../footer.xml');
+fs.writeFile('index.tmp', output)
 
 concat(['../header.xml', 'index.tmp', '../footer.xml'],
        '../plugin.xml',
-       function() {
-           fs.unlinkSync('index.tmp');
-           console.log("Build finished, plugin created!");
-       });
-
+       function () {
+         fs.unlinkSync('index.tmp')
+         console.log('Build finished, plugin created!')
+       })
 
