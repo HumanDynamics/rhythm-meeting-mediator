@@ -7,6 +7,8 @@
 // http://stackoverflow.com/questions/14587720/using-requirejs-alongside-non-amd-javascript-files)
 
 // Main RequireJS Config
+var serverUrl = 'https://breakout-dev.media.mit.edu'
+
 requirejs.config({
     baseUrl: serverUrl + '/plugin/src/',
     // do this to get cross-origin javascript through CDNs, etc.

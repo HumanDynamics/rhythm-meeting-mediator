@@ -90,7 +90,6 @@ define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", 
     }
     
     return {
-        start_pie_chart: start_pie_chart,
         start_meeting_mediator: start_meeting_mediator
     };
 });
