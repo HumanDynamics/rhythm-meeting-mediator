@@ -18,7 +18,7 @@ define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", 
         // });
         // filter out turns not by present participants
         var filtered_turns = _.filter(turns, function(turn){
-            return _.contains(participants, turn.participant_id);
+            return _.contains(participants, turn.participant);
         });
         return filtered_turns;
 
@@ -26,8 +26,8 @@ define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", 
 
     // update MM turns if it matches this hangout.
     function maybe_update_mm_turns(data) {
-        console.log("mm data:", data);
-        if (data.hangout_id == window.gapi.hangout.getHangoutId()) {
+        console.log("mm data turns:", data);
+        if (data.meeting == window.gapi.hangout.getHangoutId()) {
             mm.updateData({participants: mm.data.participants,
                            transitions: data.transitions,
                            turns: transform_turns(mm.data.participants, data.turns)});
@@ -38,39 +38,32 @@ define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", 
     // update MM participants if it matches this hangout.
     // removes the local participants from the list.
     function maybe_update_mm_participants(data) {
-        if (data.hangout_id == window.gapi.hangout.getHangoutId()) {
+      console.log('maybe updating mm partcipants...')
+        if (_.contains(data.meetings, window.gapi.hangout.getHangoutId())) {
             mm.updateData({participants: data.participants,
-                           initials: get_participant_initials(data.participants),
                            transitions: mm.data.transitions,
                            turns: mm.data.turns});
         } else {
         }
     }
 
-    function get_participant_initials(participants) {
-        var participantObjects = _.filter(window.gapi.hangout.getParticipants(),
-                                      function(p) {
-                                          return _.contains(participants, p.person.id);
-                                      });
-       return _.map(participantObjects, function(p) {
-            var words =  s.words(p.person.displayName);
-            if (words.length > 1) {
-                return "" + words[0].charAt(0) + words[1].charAt(0);
-            } else {
-                return "" + words[0].charAt(0);
-            }
-        });
-    }
-
     function start_meeting_mediator(socket) {
-        var app = feathers().configure(feathers.socketio(socket));
-        
+      var app = feathers()
+      .configure(feathers.hooks())
+      .configure(feathers.socketio(socket))
+
         var turns = app.service('turns');
         var meetings = app.service('meetings');
+        turns.on("created", function(turn) {
+          console.log("turn was created...", turn)
+        });
+        turns.on("created", maybe_update_mm_turns);
+        meetings.on("patched", maybe_update_mm_participants);
+        meetings.on("updated", maybe_update_mm_participants);
+        console.log(turns)
 
-        
 
-      hangouts.get(window.gapi.hangout.getHangoutId(),
+      meetings.get(window.gapi.hangout.getHangoutId(),
                       function(error, meeting) {
                           if (error) {
                           } else {
@@ -82,13 +75,11 @@ define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", 
                                           mm_width,
                                           mm_height);
                               mm.render('#meeting-mediator');
-                              turns.on("created", maybe_update_mm_turns);
-                              meetings.on("patched", maybe_update_mm_participants);
                           }
                       }
                      );
     }
-    
+
     return {
         start_meeting_mediator: start_meeting_mediator
     };

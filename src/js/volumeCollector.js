@@ -35,7 +35,7 @@ define(["feathers", "socketio", "underscore", 'underscore_string'], function(fea
             }
         });
 
-        
+
         // check for participants that have left for each one
         // that's left, just reset the data -- we can keep
         // them as a key, but if they return we want them to
@@ -47,9 +47,15 @@ define(["feathers", "socketio", "underscore", 'underscore_string'], function(fea
         });
     };
 
-    
+
     function startVolumeCollection (socket) {
         window.state.collectingVolumes = true;
+
+        var app = feathers()
+        .configure(feathers.hooks())
+        .configure(feathers.socketio(socket))
+
+        var utterancesService = app.service('utterances');
 
         console.log("[volumeCollector] participant ids:", participantIds);
 
@@ -130,14 +136,14 @@ define(["feathers", "socketio", "underscore", 'underscore_string'], function(fea
 
         function insertTalkEvent(participantId, startTime, endTime, volumeData) {
             console.log("inserting talk event:", startTime, endTime);
-            
+
             // if we don't have consent, don't send anything.
             if (!consent) {
                 console.log("no consent, not sending...");
                 return;
             }
 
-            socket.emit("utterance::create", 
+            utterancesService.create(
                         {
                             'participant': participantId,
                             'meeting': window.gapi.hangout.getHangoutId(),
@@ -166,7 +172,7 @@ define(["feathers", "socketio", "underscore", 'underscore_string'], function(fea
                     return;
                 }
             }
-            
+
             if (volumes.length < 3) {
                 console.log("no volumes to examine, continuing...");
                 return;

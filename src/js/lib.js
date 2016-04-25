@@ -3,18 +3,19 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
 
            // initialize global state object
            window.state = {};
-           window.state.url = config.serverUrl;
+           window.state.url = 'https://breakout-dev.media.mit.edu';
            console.log("connecting to:", window.state.url);
-           
+
            // set up raw socket for custom events.
-           var socket = io.connect(window.state.url, {
-               'transports': [
-                   'websocket',
-                   'flashsocket',
-                   'jsonp-polling',
-                   'xhr-polling',
-                   'htmlfile'
-               ]});
+           var socket = io(window.state.url, {
+             'transports': [
+               'websocket',
+               'flashsocket',
+               'htmlfile',
+               'xhr-polling',
+               'jsonp-polling'
+             ]
+           })
 
            /////////////////////////////////////////////////////////////////////
            // UI stuff
@@ -53,7 +54,7 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
                } else {
                    $('#mm-holder-consent').show();
                }
-               
+
            }
 
 
@@ -84,7 +85,22 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
                                };
                            });
            }
-           
+//           var socket2 = io(window.state.url)
+           var app = feathers()
+           .configure(feathers.hooks())
+           .configure(feathers.socketio(socket))
+
+           var participantService = app.service('participants');
+
+           participantService.on('created', function(p) {
+             console.log('P CREATED:', p)
+           })
+
+           participantService.find({}).then(function(data) {
+             console.log("GOT participants:", data)
+           }).catch(function (err) {
+             console.log("error:", err)
+           })
 
 
            // once the google api is ready...
@@ -92,13 +108,13 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
                console.log('hangout object:',  window.gapi.hangout);
                var thisHangout = window.gapi.hangout;
                console.log("hangoutId:", thisHangout.getHangoutId());
-               
+
                var participants = get_participant_objects(window.gapi.hangout.getParticipants());
-               
+
                var localParticipant = window.gapi.hangout.getLocalParticipant();
 
                volumeCollector.onParticipantsChanged(window.gapi.hangout.getParticipants());
-               
+
                socket.emit("meetingJoined",
                            {
                                participant: localParticipant.person.id,
@@ -108,6 +124,10 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
                                meeting: thisHangout.getHangoutId(),
                                meetingTopic: thisHangout.getTopic()
                            });
+
+//               socket.emit('participants::get', '113089843720892314513', function (error, participant) {
+//                 console.log('Found message', participant);
+//               });
 
                // the only other thing sent to maybe_start_heartbeat
                // is a gapi onparticipantsChanged event, so just follow the format...
@@ -143,8 +163,8 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
                                        localParticipant.person.id,
                                        thisHangout.getHangoutId(),
                                        process_consent);
-               }, 1000);
-               
+               }, 10000);
+
                $('#post-hoc-consent').on('click.consent', function(evt) {
                    consent.display_consent(process_consent);
                });
@@ -161,14 +181,14 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
 
                // start heartbeat listener
                heartbeat.register_heartbeat(socket);
-               
+
                window.gapi.hangout.onParticipantsChanged.add(function(participantsChangedEvent) {
                    console.log("participants changed:", participantsChangedEvent.participants);
                    var currentParticipants = get_participant_objects(participantsChangedEvent.participants);
 
                    // send the new participants to the volume collector, to reset volumes etc.
                    volumeCollector.onParticipantsChanged(participantsChangedEvent.participants);
-                   
+
                    console.log("sending:", currentParticipants);
                    socket.emit("participantsChanged",
                                {

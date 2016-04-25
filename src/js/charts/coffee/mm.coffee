@@ -1,7 +1,7 @@
 # Data given to MM viz:
 # {'participants': [<participantId, participantId, ...],
 #  'transitions': <Number Of transitions in interval>,
-#  'turns': [{'participant_id': <participantId>,
+#  'turns': [{'participant': <participantId>,
 #             'turns': <Percent of turns in interval by this participant>}, ...]
 
 define ['d3', 'underscore'], (d3, underscore) ->
@@ -39,8 +39,8 @@ define ['d3', 'underscore'], (d3, underscore) ->
         .clamp true
 
       # create initial node data
-      @nodes = ({'participant_id': p} for p in @data.participants)
-      @nodes.push({'participant_id': 'energy'}) # keep the energy ball in the list of nodes
+      @nodes = ({'participant': p} for p in @data.participants)
+      @nodes.push({'participant': 'energy'}) # keep the energy ball in the list of nodes
 
       @nodeTransitionTime = 500
       @linkTransitionTime = 500
@@ -48,7 +48,7 @@ define ['d3', 'underscore'], (d3, underscore) ->
       @createLinks()
 
     nodeRadius: (d) =>
-      if (d.participant_id == "energy")
+      if (d.participant == "energy")
         30
       else
         20
@@ -97,11 +97,11 @@ define ['d3', 'underscore'], (d3, underscore) ->
     # We create a group for each node, and do a selection for moving them around.
     renderNodes: () =>
       @node = @nodesG.selectAll ".node"
-        .data @nodes, (d) -> d.participant_id
+        .data @nodes, (d) -> d.participant
 
       @nodeG = @node.enter().append "g"
         .attr "class", "node"
-        .attr "id", (d) -> d.participant_id
+        .attr "id", (d) -> d.participant
 
       @nodeG.append "circle"
         .attr "class", "nodeCircle"
@@ -112,7 +112,7 @@ define ['d3', 'underscore'], (d3, underscore) ->
         .attr "class", "nodeFill"
         .attr "fill", "#FFFFFF"
         .attr "r", (d) =>
-          if (d.participant_id == 'energy' or d.participant_id == @localParticipant)
+          if (d.participant == 'energy' or d.participant == @localParticipant)
             0
           else
             @nodeRadius(d) - 3
@@ -127,9 +127,9 @@ define ['d3', 'underscore'], (d3, underscore) ->
 
     # different colors for different types of nodes...
     nodeColor: (d) =>
-      if (d.participant_id == 'energy')
+      if (d.participant == 'energy')
         @sphereColorScale(@data.transitions)
-      else if d.participant_id == @localParticipant
+      else if d.participant == @localParticipant
         '#092070'
       else
         '#3AC4C5'
@@ -137,15 +137,15 @@ define ['d3', 'underscore'], (d3, underscore) ->
     # we have different kinds of nodes, so this just abstracts
     # out the transform function.
     nodeTransform: (d) =>
-      if (d.participant_id == "energy")
+      if (d.participant == "energy")
         @sphereTranslation()
       else
-        "rotate(" + @angle(d.participant_id) + ")translate(" + @radius + ",0)"
+        "rotate(" + @angle(d.participant) + ")translate(" + @radius + ",0)"
 
     # a translatoin between the angle rotation for nodes
     # and the raw x/y positions. Used for computing link endpoints.
     getNodeCoords: (id) =>
-      transformText = @nodeTransform({'participant_id': id})
+      transformText = @nodeTransform({'participant': id})
       coords = d3.transform(transformText).translate
       return {'x': coords[0], 'y': coords[1]}
 
@@ -185,7 +185,7 @@ define ['d3', 'underscore'], (d3, underscore) ->
       y = 0
 
       for turn in @data.turns
-        coords = @getNodeCoords(turn.participant_id)
+        coords = @getNodeCoords(turn.participant)
         # get coordinates of this node & distance from ball
         node_x = coords['x']
         node_y = coords['y']
@@ -201,10 +201,10 @@ define ['d3', 'underscore'], (d3, underscore) ->
     # create links, give it a 0 default (all nodes should be linked to
     # ball)
     createLinks: () =>
-      @links = ({'source': turn.participant_id, 'target': 'energy', 'weight': turn.turns} for turn in @data.turns)
-      for participant_id in @data.participants
-        if !_.find(@links, (link) => link.source == participant_id)
-          @links.push({'source': participant_id, 'target': 'energy', 'weight': 0})
+      @links = ({'source': turn.participant, 'target': 'energy', 'weight': turn.turns} for turn in @data.turns)
+      for participant in @data.participants
+        if !_.find(@links, (link) => link.source == participant)
+          @links.push({'source': participant, 'target': 'energy', 'weight': 0})
 
 
     # we want the users's node always at the top
@@ -234,8 +234,8 @@ define ['d3', 'underscore'], (d3, underscore) ->
       else
         # Create nodes again
         @data = data
-        @nodes = ({'participant_id': p} for p in @data.participants)
-        @nodes.push({'participant_id': 'energy'}) # keep the energy ball in the list of nodes
+        @nodes = ({'participant': p} for p in @data.participants)
+        @nodes.push({'participant': 'energy'}) # keep the energy ball in the list of nodes
 
         # recompute the color scale for the sphere and angle domain
         @sphereColorScale.domain [0, data.participants.length * 5]
