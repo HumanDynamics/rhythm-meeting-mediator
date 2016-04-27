@@ -190,11 +190,16 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
                    volumeCollector.onParticipantsChanged(participantsChangedEvent.participants);
 
                    console.log("sending:", currentParticipants);
-                   socket.emit("participantsChanged",
-                               {
-                                   meeting: window.gapi.hangout.getHangoutId(),
-                                   participants: currentParticipants
-                               });
+                   const meetingService = app.service('meetings')
+                   meetingService.patch(window.gapi.hangout.getHangoutId(), {
+                     participants: _.pluck(currentParticipants, 'participant') // change to only participants with app
+                     totalparticipants: currentParticipants.length
+                   })
+                 /* socket.emit("participantsChanged",
+                    {
+                    meeting: window.gapi.hangout.getHangoutId(),
+                    participants: currentParticipants
+                    }); */
                });
            }
 

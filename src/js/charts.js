@@ -38,8 +38,8 @@ define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", 
     // update MM participants if it matches this hangout.
     // removes the local participants from the list.
     function maybe_update_mm_participants(data) {
-      console.log('maybe updating mm partcipants...')
-        if (_.contains(data.meetings, window.gapi.hangout.getHangoutId())) {
+      console.log('maybe updating mm partcipants...', data)
+      if (data._id === window.gapi.hangout.getHangoutId()) {
             mm.updateData({participants: data.participants,
                            transitions: mm.data.transitions,
                            turns: mm.data.turns});
@@ -60,6 +60,9 @@ define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", 
         turns.on("created", maybe_update_mm_turns);
         meetings.on("patched", maybe_update_mm_participants);
         meetings.on("updated", maybe_update_mm_participants);
+        meetings.on('patched', function (data) {
+          console.log(">>> got a patched event...", data)
+        })
         console.log(turns)
 
 
