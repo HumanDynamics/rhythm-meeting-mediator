@@ -16,6 +16,8 @@ define(["feathers", "socketio", "underscore", 'underscore_string'], function(fea
     //TODO: do this on a websocket event instead?
     var onParticipantsChanged = function(participants) {
         console.log("volumeCollector onParticipantsChanged");
+
+        participants = _.filter(participants, (p) => { return p.hasAppEnabled })
         var newParticipantIds = _.map(participants,
                                   function(p) {
                                       return {'gid': p.person.id, 'hid': p.id};
@@ -148,8 +150,8 @@ define(["feathers", "socketio", "underscore", 'underscore_string'], function(fea
                             'participant': participantId,
                             'meeting': window.gapi.hangout.getHangoutId(),
                             'startTime': new Date(startTime).toISOString(),
-                            'endTime': new Date(endTime).toISOString()
-                            //'volumes': volumeData  // comment to not collect raw data
+                            'endTime': new Date(endTime).toISOString(),
+                            'volumes': volumeData  // comment to not collect raw data
                         },
                         {},
                         function(error, data) {

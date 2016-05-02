@@ -184,7 +184,9 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
 
                window.gapi.hangout.onParticipantsChanged.add(function(participantsChangedEvent) {
                    console.log("participants changed:", participantsChangedEvent.participants);
-                   var currentParticipants = get_participant_objects(participantsChangedEvent.participants);
+                   var currentParticipants = _.map(_.filter(participantsChangedEvent.participants,
+                                                            (p) => { return p.hasAppEnabled }),
+                                                   (p) => { return p.person.id })
 
                    // send the new participants to the volume collector, to reset volumes etc.
                    volumeCollector.onParticipantsChanged(participantsChangedEvent.participants);
@@ -192,9 +194,17 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
                    console.log("sending:", currentParticipants);
                    const meetingService = app.service('meetings')
                    meetingService.patch(window.gapi.hangout.getHangoutId(), {
-                     participants: _.pluck(currentParticipants, 'participant') // change to only participants with app
-                     totalparticipants: currentParticipants.length
+                     participants: currentParticipants // change to only participants with app
                    })
+
+                   const participantEventService = app.service('participantEvents')
+                   participantEventService.create({
+                     meeting: window.gapi.hangout.getHangoutId(),
+                     participants: currentParticipants,
+                     totalParticipants: participantsChangedEvent.participants.length
+                   })
+
+                   
                  /* socket.emit("participantsChanged",
                     {
                     meeting: window.gapi.hangout.getHangoutId(),
