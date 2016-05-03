@@ -57,15 +57,6 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
 
            }
 
-
-
-           ///////////////////////////////////////////////////////////////////////
-           // Everything else
-
-           // var app = feathers().configure(feathers.socketio(s));
-           // var hangouts = app.service('hangouts');
-           // var talktimes = app.service('talktimes');
-
            function collection_consent(consentVal) {
                if (!consentVal) {
                    volumeCollector.consent = false;
@@ -85,23 +76,10 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
                                };
                            });
            }
-//           var socket2 = io(window.state.url)
+
            var app = feathers()
            .configure(feathers.hooks())
            .configure(feathers.socketio(socket))
-
-           var participantService = app.service('participants');
-
-           participantService.on('created', function(p) {
-             console.log('P CREATED:', p)
-           })
-
-           participantService.find({}).then(function(data) {
-             console.log("GOT participants:", data)
-           }).catch(function (err) {
-             console.log("error:", err)
-           })
-
 
            // once the google api is ready...
            window.gapi.hangout.onApiReady.add(function(eventObj) {
@@ -115,6 +93,8 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
 
                volumeCollector.onParticipantsChanged(window.gapi.hangout.getParticipants());
 
+               var start_data = window.gapi.hangout.getStartData();
+
                socket.emit("meetingJoined",
                            {
                                participant: localParticipant.person.id,
@@ -122,12 +102,10 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
                                participant_locale: localParticipant.locale,
                                participants: participants,
                                meeting: thisHangout.getHangoutId(),
-                               meetingTopic: thisHangout.getTopic()
+                               meetingTopic: thisHangout.getTopic(),
+                               meetingUrl: thisHangout.getHangoutUrl(),
+                               meta: start_data
                            });
-
-//               socket.emit('participants::get', '113089843720892314513', function (error, participant) {
-//                 console.log('Found message', participant);
-//               });
 
                // the only other thing sent to maybe_start_heartbeat
                // is a gapi onparticipantsChanged event, so just follow the format...
@@ -190,16 +168,11 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
                    volumeCollector.onParticipantsChanged(participantsChangedEvent.participants);
 
                    console.log("sending:", currentParticipants);
-                   const meetingService = app.service('meetings')
+                   const meetingService = app.service('meetings');
                    meetingService.patch(window.gapi.hangout.getHangoutId(), {
-                     participants: _.pluck(currentParticipants, 'participant') // change to only participants with app
+                     participants: _.pluck(currentParticipants, 'participant'),
                      totalparticipants: currentParticipants.length
                    })
-                 /* socket.emit("participantsChanged",
-                    {
-                    meeting: window.gapi.hangout.getHangoutId(),
-                    participants: currentParticipants
-                    }); */
                });
            }
 
