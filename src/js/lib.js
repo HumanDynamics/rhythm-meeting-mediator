@@ -185,8 +185,8 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
                window.gapi.hangout.onParticipantsChanged.add(function(participantsChangedEvent) {
                    console.log("participants changed:", participantsChangedEvent.participants);
                    var currentParticipants = _.map(_.filter(participantsChangedEvent.participants,
-                                                            (p) => { return p.hasAppEnabled }),
-                                                   (p) => { return p.person.id })
+                                                            function (p) { return p.hasAppEnabled }),
+                                                   function (p) { return p.person.id })
 
                    // send the new participants to the volume collector, to reset volumes etc.
                    volumeCollector.onParticipantsChanged(participantsChangedEvent.participants);
