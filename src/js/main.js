@@ -7,10 +7,10 @@
 // http://stackoverflow.com/questions/14587720/using-requirejs-alongside-non-amd-javascript-files)
 
 // Main RequireJS Config
-var serverUrl = 'https://breakout-dev.media.mit.edu'
+var serverUrl = '<%= serverUrl %>'
 
 requirejs.config({
-    baseUrl: serverUrl + '/plugin/src/',
+    baseUrl: serverUrl + '/plugin/dist/',
     // do this to get cross-origin javascript through CDNs, etc.
     text: {
         useXhr: function (url, protocol, hostname, port) {
@@ -23,63 +23,63 @@ requirejs.config({
     packages: [
         {
             name: 'cs',
-            location: './bower_components/require-cs',
+            location: '../bower_components/require-cs',
             main: 'cs'
         },
         {
             name: 'coffee-script',
-            location: './bower_components/coffeescript',
+            location: '../bower_components/coffeescript',
             main: 'extras/coffee-script'
         },
         {
             name: 'text',
-            location: './bower_components/requirejs-plugins/lib',
+            location: '../bower_components/requirejs-plugins/lib',
             main: 'text'
         },
         {
             name: 'json',
-            location: './bower_components/requirejs-plugins/src',
+            location: '../bower_components/requirejs-plugins/src',
             main: 'json'
         }
     ],
 
     paths: {
         src: './js',
-        libs: './bower_components',
-        jquery: './bower_components/jquery/dist/jquery',
-        jqueryui: './bower_components/jquery-ui/jquery-ui',
-        d3: './bower_components/d3/d3',
-        underscore: './bower_components/underscore/underscore',
-        underscore_string: './bower_components/underscore.string/dist/underscore.string',
-        feathers: './bower_components/feathers-client/dist/feathers',
-        socketio: './bower_components/socket.io-client/socket.io',
+        libs: '../bower_components',
+        jquery: '../bower_components/jquery/dist/jquery',
+        jqueryui: '../bower_components/jquery-ui/jquery-ui',
+        d3: '../bower_components/d3/d3',
+        underscore: '../bower_components/underscore/underscore',
+        underscore_string: '../bower_components/underscore.string/dist/underscore.string',
+        feathers: '../bower_components/feathers-client/dist/feathers',
+        socketio: '../bower_components/socket.io-client/socket.io',
         gapi: 'https://plus.google.com/hangouts/_/api/v1/hangout',
         // include materialize...
-        'materialize.global': './bower_components/Materialize/js/global',
-        'materialize.animation': './bower_components/Materialize/js/animation',
-        'materialize.toasts': './bower_components/Materialize/js/toasts',
-        'materialize.collapsible': './bower_components/Materialize/js/collapsible',
-        'materialize.dropdown': './bower_components/Materialize/js/dropdown',
-        'materialize.leanModal': './bower_components/Materialize/js/leanModal',
-        'materialize.materialbox': './bower_components/Materialize/js/materialbox',
-        'materialize.parallax': './bower_components/Materialize/js/parallax',
-        'materialize.tabs': './bower_components/Materialize/js/tabs',
-        'materialize.tooltip': './bower_components/Materialize/js/tooltip',
-        'materialize.sideNav': './bower_components/Materialize/js/sideNav',
-        'materialize.scrollspy': './bower_components/Materialize/js/scrollspy',
-        'materialize.forms': './bower_components/Materialize/js/forms',
-        'materialize.slider': './bower_components/Materialize/js/slider',
-        'materialize.cards': './bower_components/Materialize/js/cards',
-        'materialize.pushpin': './bower_components/Materialize/js/pushpin',
-        'materialize.transitions': './bower_components/Materialize/js/transitions',
-        'materialize.scrollFire': './bower_components/Materialize/js/scrollFire',
-        'materialize.waves': './bower_components/Materialize/js/waves',
-        'materialize.character_counter': './bower_components/Materialize/js/character_counter',
-        'materialize.picker': './bower_components/Materialize/js/date_picker/picker',
-        'materialize.picker.date': './bower_components/Materialize/js/date_picker/picker.date',
-        'hammerjs': './bower_components/hammerjs/hammer',
-        'jquery-hammerjs': './bower_components/jquery-hammerjs/jquery.hammer',
-        'velocity': './bower_components/velocity/velocity'
+        'materialize.global': '../bower_components/materialize/js/global',
+        'materialize.animation': '../bower_components/materialize/js/animation',
+        'materialize.toasts': '../bower_components/materialize/js/toasts',
+        'materialize.collapsible': '../bower_components/materialize/js/collapsible',
+        'materialize.dropdown': '../bower_components/materialize/js/dropdown',
+        'materialize.leanModal': '../bower_components/materialize/js/leanModal',
+        'materialize.materialbox': '../bower_components/materialize/js/materialbox',
+        'materialize.parallax': '../bower_components/materialize/js/parallax',
+        'materialize.tabs': '../bower_components/materialize/js/tabs',
+        'materialize.tooltip': '../bower_components/materialize/js/tooltip',
+        'materialize.sideNav': '../bower_components/materialize/js/sideNav',
+        'materialize.scrollspy': '../bower_components/materialize/js/scrollspy',
+        'materialize.forms': '../bower_components/materialize/js/forms',
+        'materialize.slider': '../bower_components/materialize/js/slider',
+        'materialize.cards': '../bower_components/materialize/js/cards',
+        'materialize.pushpin': '../bower_components/materialize/js/pushpin',
+        'materialize.transitions': '../bower_components/materialize/js/transitions',
+        'materialize.scrollFire': '../bower_components/materialize/js/scrollFire',
+        'materialize.waves': '../bower_components/materialize/js/waves',
+        'materialize.character_counter': '../bower_components/materialize/js/character_counter',
+        'materialize.picker': '../bower_components/materialize/js/date_picker/picker',
+        'materialize.picker.date': '../bower_components/materialize/js/date_picker/picker.date',
+        'hammerjs': '../bower_components/hammerjs/hammer',
+        'jquery-hammerjs': '../bower_components/jquery-hammerjs/jquery.hammer',
+        'velocity': '../bower_components/velocity/velocity'
     },
 
     shim: {
