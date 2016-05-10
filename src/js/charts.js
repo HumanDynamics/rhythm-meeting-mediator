@@ -51,6 +51,7 @@ define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", 
       var app = feathers()
       .configure(feathers.hooks())
       .configure(feathers.socketio(socket))
+      console.log('>> Starting meeting mediator...')
 
         var turns = app.service('turns');
         var meetings = app.service('meetings');
@@ -68,7 +69,8 @@ define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", 
 
       meetings.get(window.gapi.hangout.getHangoutId(),
                       function(error, meeting) {
-                          if (error) {
+                        if (error) {
+                          console.log('couldnt get meeting:', error)
                           } else {
                               console.log("MM viz found meeting:", meeting);
                               mm = new MM({participants: meeting.participants,

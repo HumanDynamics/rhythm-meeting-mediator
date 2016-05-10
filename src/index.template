@@ -7,7 +7,7 @@
 <body>
     <nav>
         <div class="nav-wrapper">
-            <a class="brand-logo" href="https://breakout.media.mit.edu">Breakout</a>
+            <a class="brand-logo" href="{{serverUrl}}/breakout">Breakout</a>
             <ul class="right">
               <li>
                 <a href="#info-modal" class="modal-trigger">
@@ -46,8 +46,8 @@
             </div>
             <div class="col s5 center-align valign-wrapper">
                 <a class="tooltipped" data-position="top" data-delay="50" data-tooltip="Talk to Us" href="mailto:cues-support@mit.edu" ><i class="small material-icons page-icon">email</i></a>
-                <a class="tooltipped" data-position="top" data-delay="50" data-tooltip="Found an issue?" href="https://github.com/HumanDynamics/breakout/issues/new" ><i class="small material-icons page-icon">report_problem</i></a>
-                <a class="tooltipped" data-position="top" data-delay="50" data-tooltip="See the Code" href="https://github.com/HumanDynamics/breakout"><i class="small material-icons page-icon">code</i></a>
+                <a class="tooltipped" data-position="top" data-delay="50" data-tooltip="Found an issue?" href="https://github.com/HumanDynamics/rhythm-meeting-mediator/issues/new" ><i class="small material-icons page-icon">report_problem</i></a>
+                <a class="tooltipped" data-position="top" data-delay="50" data-tooltip="See the Code" href="https://github.com/HumanDynamics/rhythm-meeting-mediator"><i class="small material-icons page-icon">code</i></a>
             </div>
         </div>
         <ul class="collection" id="settings-pane">

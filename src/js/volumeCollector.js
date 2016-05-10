@@ -17,7 +17,7 @@ define(["feathers", "socketio", "underscore", 'underscore_string'], function(fea
     var onParticipantsChanged = function(participants) {
         console.log("volumeCollector onParticipantsChanged");
 
-        participants = _.filter(participants, (p) => { return p.hasAppEnabled })
+        participants = _.filter(participants, function (p) { return p.hasAppEnabled })
         var newParticipantIds = _.map(participants,
                                   function(p) {
                                       return {'gid': p.person.id, 'hid': p.id};

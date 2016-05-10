@@ -92,16 +92,6 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
 
            var participantService = app.service('participants');
 
-           participantService.on('created', function(p) {
-             console.log('P CREATED:', p)
-           })
-
-           participantService.find({}).then(function(data) {
-             console.log("GOT participants:", data)
-           }).catch(function (err) {
-             console.log("error:", err)
-           })
-
 
            // once the google api is ready...
            window.gapi.hangout.onApiReady.add(function(eventObj) {
@@ -113,7 +103,7 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
 
                var localParticipant = window.gapi.hangout.getLocalParticipant();
 
-               volumeCollector.onParticipantsChanged(window.gapi.hangout.getParticipants());
+             volumeCollector.onParticipantsChanged(window.gapi.hangout.getParticipants());
 
                socket.emit("meetingJoined",
                            {
@@ -163,7 +153,7 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
                                        localParticipant.person.id,
                                        thisHangout.getHangoutId(),
                                        process_consent);
-               }, 10000);
+               }, 2000);
 
                $('#post-hoc-consent').on('click.consent', function(evt) {
                    consent.display_consent(process_consent);
