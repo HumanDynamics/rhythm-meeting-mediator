@@ -1,13 +1,13 @@
 <head>
     <title>Breakout</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="{{serverUrl}}/plugin/src/assets/style.css">
-    <link rel="stylesheet" type="text/css" href="{{serverUrl}}/plugin/src/bower_components/Materialize/bin/materialize.css">
+    <link rel="stylesheet" type="text/css" href="<%= serverUrl %>/plugin/dist/css/style.css">
+    <link rel="stylesheet" type="text/css" href="<%= serverUrl %>/plugin/bower_components/materialize/bin/materialize.css">
 </head>
 <body>
     <nav>
         <div class="nav-wrapper">
-            <a class="brand-logo" href="{{serverUrl}}/breakout">Breakout</a>
+            <a class="brand-logo" href="<%= serverUrl %>/breakout">Breakout</a>
             <ul class="right">
               <li>
                 <a href="#info-modal" class="modal-trigger">
@@ -19,7 +19,6 @@
     </nav>
 
     <div class="center-justified">
-        <!-- <div id="pie-chart"></div> -->
         <div id="meeting-mediator"></div>
         <div id="mm-holder-consent" class="container center-align">
             <div class="circle">
@@ -41,7 +40,7 @@
         <div class="row valign-wrapper">
             <div class="col s7">
                 <a href="http://connection.mit.edu/"  >
-                    <img id="connection-science-logo" class="responsive-img" src="{{serverUrl}}/plugin/src/assets/connection-science.png">
+                    <img id="connection-science-logo" class="responsive-img" src="<%= serverUrl %>/plugin/dist/images/connection-science.png">
                 </a>
             </div>
             <div class="col s5 center-align valign-wrapper">
@@ -67,7 +66,7 @@
                         <span class="lever"></span>
                         Yes
                     </label>
-                </div>                
+                </div>
             </li>
         </ul>
     </div>
@@ -154,8 +153,4 @@
 
 </body>
 
-<!-- requirejs -->
-<script>
- var serverUrl = "{{serverUrl}}";
-</script>
-<script data-main="{{serverUrl}}/plugin/src/js/main" src="{{serverUrl}}/plugin/src/bower_components/requirejs/require.js"></script>
+<script data-main="<%= serverUrl %>/plugin/dist/js/main" src="<%= serverUrl %>/plugin/bower_components/requirejs/require.js"></script>

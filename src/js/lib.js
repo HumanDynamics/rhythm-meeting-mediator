@@ -3,7 +3,7 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
 
            // initialize global state object
            window.state = {};
-           window.state.url = 'https://breakout-dev.media.mit.edu';
+           window.state.url = '<%= serverUrl %>';
            console.log("connecting to:", window.state.url);
 
            // set up raw socket for custom events.
