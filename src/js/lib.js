@@ -1,5 +1,5 @@
-define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/consent", "feathers", "socketio", "underscore", "gapi", "jquery"],
-       function(config, volumeCollector, heartbeat, charts, consent, feathers, io, underscore, gapi, $) {
+define(["config", "src/volumeCollector", "src/cameraCollector", "src/heartbeat", "src/charts", "src/consent", "feathers", "socketio", "underscore", "gapi", "jquery"],
+       function(config, volumeCollector, cameraCollector, heartbeat, charts, consent, feathers, io, underscore, gapi, $) {
 
            // initialize global state object
            window.state = {};
@@ -178,10 +178,12 @@ define(["config", "src/volumeCollector", "src/heartbeat", "src/charts", "src/con
                    const participantEventService = app.service('participantEvents')
                    participantEventService.create({
                      meeting: window.gapi.hangout.getHangoutId(),
-                     //totalParticipants: participantsChangedEvent.participants.length,
                      participants: _.pluck(currentParticipants, 'participant')
                    })
                });
+
+              volumeCollector.registerOnMicrophoneMuteListener(window.gapi, socket);
+              cameraCollector.registerOnCameraMuteListener(window.gapi, socket);
            }
 
        });

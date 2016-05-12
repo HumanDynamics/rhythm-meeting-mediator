@@ -61,17 +61,6 @@ define(["feathers", "socketio", "underscore", 'underscore_string'], function(fea
 
         console.log("[volumeCollector] participant ids:", participantIds);
 
-        // // change collecting state
-        // if (window.state) {
-        //     if (!window.state.collectingVolumes) {
-        //         console.log("not collecting volumes...");
-        //         return;
-        //     }
-        //     state.collectingVolumes = true;
-        // }
-
-
-
         //////////////////////////////////////////
 
         // constants for talking 'algorithm'
@@ -278,16 +267,23 @@ define(["feathers", "socketio", "underscore", 'underscore_string'], function(fea
         });
     }
 
-    function stopVolumeCollection() {
-        //TODO: also need to stop the window.gapi onVolumesChanged
-        window.clearInterval(window.state.silenceDetector); // clear silence setInterval
-        window.state.collectingVolumes = false;
+    function registerOnMicrophoneMuteListener(gapi, socket) {
+        gapi.hangout.av.onMicrophoneMute.add(function(microphoneMuteEvent){
+            var participant = gapi.hangout.getLocalParticipant();
+
+            socket.emit("microphoneMute",
+            {
+                participant: participant.person.id,
+                meetingId: gapi.hangout.getHangoutId(),
+                isMicrophoneMute: microphoneMuteEvent.isMicrophoneMute
+            });
+        })
     }
 
     return {
         startVolumeCollection: startVolumeCollection,
         onParticipantsChanged: onParticipantsChanged,
-        stopVolumeCollection: stopVolumeCollection
+        registerOnMicrophoneMuteListener: registerOnMicrophoneMuteListener
     };
 
 });
