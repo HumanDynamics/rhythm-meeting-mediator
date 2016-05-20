@@ -234,12 +234,12 @@ define ['d3', 'underscore'], (d3, underscore) ->
       else
         # Create nodes again
         @data = data
+        @angle.domain @data.participants
         @nodes = ({'participant': p} for p in @data.participants)
         @nodes.push({'participant': 'energy'}) # keep the energy ball in the list of nodes
 
         # recompute the color scale for the sphere and angle domain
         @sphereColorScale.domain [0, data.participants.length * 5]
-        @angle.domain @data.participants
 
         # recompute links
         @link = @linksG.selectAll "line.link"
