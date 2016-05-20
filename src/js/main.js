@@ -107,7 +107,7 @@ requirejs.config({
             deps: ['materialize.global']
         },
         'materialize.leanModal': {
-            deps: ['materialize.global']
+            deps: ['materialize.global', 'jquery']
         },
         'materialize.materialbox': {
             deps: ['materialize.global']

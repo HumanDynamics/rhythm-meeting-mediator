@@ -61,9 +61,6 @@ define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", 
         turns.on("created", maybe_update_mm_turns);
         meetings.on("patched", maybe_update_mm_participants);
         meetings.on("updated", maybe_update_mm_participants);
-        meetings.on('patched', function (data) {
-          console.log(">>> got a patched event...", data)
-        })
         console.log(turns)
 
 

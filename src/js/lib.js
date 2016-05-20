@@ -32,7 +32,7 @@ define(["config", "src/volumeCollector", "src/cameraCollector", "src/heartbeat",
                }
            });
 
-           $('.modal-trigger').leanModal();
+           $('#info-modal-trigger').leanModal();
            $('#mm-holder-consent').hide();
 
            // all links need to open in new tab.
@@ -109,10 +109,8 @@ define(["config", "src/volumeCollector", "src/cameraCollector", "src/heartbeat",
 
                // the only other thing sent to maybe_start_heartbeat
                // is a gapi onparticipantsChanged event, so just follow the format...
-               if (participants.length == 1) {
-                   heartbeat.register_heartbeat(socket);
-                   heartbeat.maybe_start_heartbeat([localParticipant]);
-               }
+               heartbeat.register_heartbeat(socket);
+               heartbeat.maybe_start_heartbeat([localParticipant]);
 
                function process_consent(consentVal) {
                    console.log("processing consent");

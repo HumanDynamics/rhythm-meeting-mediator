@@ -10,7 +10,7 @@
             <a class="brand-logo" href="<%= serverUrl %>/breakout">Breakout</a>
             <ul class="right">
               <li>
-                <a href="#info-modal" class="modal-trigger">
+                <a id="info-modal-trigger" href="#info-modal" class="modal-trigger">
                   <i class="small material-icons">info_outline</i>
                 </a>
               </li>
