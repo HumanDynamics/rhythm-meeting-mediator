@@ -83,7 +83,7 @@ define(["config", "src/volumeCollector", "src/cameraCollector", "src/heartbeat",
 
            // once the google api is ready...
            hangout.onApiReady.add(function(eventObj) {
-               var start_data = hangout.getStartData();
+               var start_data = JSON.parse(hangout.getStartData());
 
                // If there is not start data pull
                // the apikey from the shared state
@@ -114,7 +114,7 @@ define(["config", "src/volumeCollector", "src/cameraCollector", "src/heartbeat",
                                meeting: hangout.getHangoutId(),
                                meetingTopic: hangout.getTopic(),
                                meetingUrl: hangout.getHangoutUrl(),
-                               meta: start_data
+                               meta: JSON.stringify(start_data)
                            });
 
                // the only other thing sent to maybe_start_heartbeat
