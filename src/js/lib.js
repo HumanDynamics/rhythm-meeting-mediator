@@ -6,6 +6,8 @@ define(["config", "src/volumeCollector", "src/cameraCollector", "src/heartbeat",
            window.state.url = '<%= serverUrl %>';
            console.log("connecting to:", window.state.url);
 
+           var api_key = null;
+
            // set up raw socket for custom events.
            var socket = io(window.state.url, {
              'transports': [
@@ -77,23 +79,31 @@ define(["config", "src/volumeCollector", "src/cameraCollector", "src/heartbeat",
                            });
            }
 
-           var app = feathers()
-           .configure(feathers.hooks())
-           .configure(feathers.socketio(socket))
+           var hangout = window.gapi.hangout;
 
            // once the google api is ready...
-           window.gapi.hangout.onApiReady.add(function(eventObj) {
-               console.log('hangout object:',  window.gapi.hangout);
-               var thisHangout = window.gapi.hangout;
-               console.log("hangoutId:", thisHangout.getHangoutId());
+           hangout.onApiReady.add(function(eventObj) {
+               var start_data = hangout.getStartData();
 
-               var participants = get_participant_objects(window.gapi.hangout.getParticipants());
+               // If there is not start data pull
+               // the apikey from the shared state
+              if(start_data == null) {
+                var state = hangout.data.getState();
+                api_key = state.apikey;
+              } else {
+                hangout.data.submitDelta(start_data);
+                api_key = start_data.apikey;
+              }
 
-               var localParticipant = window.gapi.hangout.getLocalParticipant();
+              console.log('API Key: ', api_key);
 
-             volumeCollector.onParticipantsChanged(window.gapi.hangout.getParticipants());
+               console.log('hangout object:',  hangout);
+               console.log("hangoutId:", hangout.getHangoutId());
 
-               var start_data = window.gapi.hangout.getStartData();
+               var participants = get_participant_objects(hangout.getParticipants());
+               var localParticipant = hangout.getLocalParticipant();
+
+               volumeCollector.onParticipantsChanged(hangout.getParticipants());
 
                socket.emit("meetingJoined",
                            {
@@ -101,9 +111,9 @@ define(["config", "src/volumeCollector", "src/cameraCollector", "src/heartbeat",
                                name: localParticipant.person.displayName,
                                participant_locale: localParticipant.locale,
                                participants: participants,
-                               meeting: thisHangout.getHangoutId(),
-                               meetingTopic: thisHangout.getTopic(),
-                               meetingUrl: thisHangout.getHangoutUrl(),
+                               meeting: hangout.getHangoutId(),
+                               meetingTopic: hangout.getTopic(),
+                               meetingUrl: hangout.getHangoutUrl(),
                                meta: start_data
                            });
 
@@ -137,7 +147,7 @@ define(["config", "src/volumeCollector", "src/cameraCollector", "src/heartbeat",
                setTimeout(function()  {
                    consent.get_consent(socket,
                                        localParticipant.person.id,
-                                       thisHangout.getHangoutId(),
+                                       hangout.getHangoutId(),
                                        process_consent);
                }, 2000);
 
@@ -151,6 +161,14 @@ define(["config", "src/volumeCollector", "src/cameraCollector", "src/heartbeat",
            });
 
            function addHangoutListeners() {
+              var app = feathers()
+             .configure(feathers.hooks())
+             .configure(feathers.socketio(socket))
+             .authenticate({
+              type: 'token',
+              'token': api_key
+              })
+
                console.log("adding hangout listeners...");
                // start collecting volume data
                volumeCollector.startVolumeCollection(socket);
