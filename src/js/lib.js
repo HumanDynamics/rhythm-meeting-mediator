@@ -164,14 +164,11 @@ define(["config", "src/volumeCollector", "src/cameraCollector", "src/heartbeat",
               var app = feathers()
              .configure(feathers.hooks())
              .configure(feathers.socketio(socket))
-             .authenticate({
-              type: 'token',
-              'token': api_key
-              })
+             .configure(feathers.authentication({ type: 'token', 'token': api_key }))
 
                console.log("adding hangout listeners...");
                // start collecting volume data
-               volumeCollector.startVolumeCollection(socket);
+               volumeCollector.startVolumeCollection(app);
 
                // start heartbeat listener
                heartbeat.register_heartbeat(socket);

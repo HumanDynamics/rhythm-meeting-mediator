@@ -50,12 +50,8 @@ define(["feathers", "socketio", "underscore", 'underscore_string'], function(fea
     };
 
 
-    function startVolumeCollection (socket) {
+    function startVolumeCollection (app) {
         window.state.collectingVolumes = true;
-
-        var app = feathers()
-        .configure(feathers.hooks())
-        .configure(feathers.socketio(socket))
 
         var utterancesService = app.service('utterances');
 
