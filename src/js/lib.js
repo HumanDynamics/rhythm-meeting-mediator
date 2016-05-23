@@ -7,6 +7,7 @@ define(["config", "src/volumeCollector", "src/cameraCollector", "src/heartbeat",
            console.log("connecting to:", window.state.url);
 
            var api_key = null;
+           var app = null;
 
            // set up raw socket for custom events.
            var socket = io(window.state.url, {
@@ -95,6 +96,21 @@ define(["config", "src/volumeCollector", "src/cameraCollector", "src/heartbeat",
                 api_key = start_data.apikey;
               }
 
+              app = feathers()
+             .configure(feathers.hooks())
+             .configure(feathers.socketio(socket))
+             .configure(feathers.authentication())
+
+              app.authenticate({
+                  type: 'token',
+                  'token': api_key
+                }).then(function(result){
+                  console.log('Authenticated!', app.get('token'));
+                }).catch(function(error){
+                  console.error('Error authenticating!', error);
+                });
+
+
               console.log('API Key: ', api_key);
 
                console.log('hangout object:',  hangout);
@@ -130,7 +146,7 @@ define(["config", "src/volumeCollector", "src/cameraCollector", "src/heartbeat",
                    $('#no-consent-button').off('click.consent');
                    if (consentVal === true) {
                        addHangoutListeners();
-                       charts.start_meeting_mediator(socket);
+                       charts.start_meeting_mediator(app);
                        ui_consent(consentVal);
                        collection_consent(consentVal);
                        $('#post-hoc-consent').off('click.consent');
@@ -161,10 +177,7 @@ define(["config", "src/volumeCollector", "src/cameraCollector", "src/heartbeat",
            });
 
            function addHangoutListeners() {
-              var app = feathers()
-             .configure(feathers.hooks())
-             .configure(feathers.socketio(socket))
-             .configure(feathers.authentication({ type: 'token', 'token': api_key }))
+
 
                console.log("adding hangout listeners...");
                // start collecting volume data

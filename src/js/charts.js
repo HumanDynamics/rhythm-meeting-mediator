@@ -47,10 +47,7 @@ define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", 
         }
     }
 
-    function start_meeting_mediator(socket) {
-      var app = feathers()
-      .configure(feathers.hooks())
-      .configure(feathers.socketio(socket))
+    function start_meeting_mediator(app) {
       console.log('>> Starting meeting mediator...')
 
         var turns = app.service('turns');
