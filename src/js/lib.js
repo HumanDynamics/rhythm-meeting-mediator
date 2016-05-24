@@ -19,32 +19,33 @@ define(["config", "src/participantsRemovedCollector", "src/volumeCollector", "sr
 
          /////////////////////////////////////////////////////////////////////
          // UI stuff
-         $('#move-footer').click(function() {
-           console.log("clicked!");
-           if($('#footer').hasClass('slide-up')) {
-             $('#footer').addClass('slide-down', 150, 'linear');
-             $('#footer').removeClass('slide-up');
-             $('#upbutton').removeClass('upside-down', 150, 'linear');
-           } else {
-             $('#footer').removeClass('slide-down');
-             $('#footer').addClass('slide-up', 150, 'linear');
-             $('#upbutton').addClass('upside-down', 150, 'linear');
-           }
-         });
+         $(document).ready(function () {
+           $('#move-footer').click(function () {
+             console.log("clicked!");
+             if($('#footer').hasClass('slide-up')) {
+               $('#footer').addClass('slide-down', 150, 'linear');
+               $('#footer').removeClass('slide-up');
+               $('#upbutton').removeClass('upside-down', 150, 'linear');
+             } else {
+               $('#footer').removeClass('slide-down');
+               $('#footer').addClass('slide-up', 150, 'linear');
+               $('#upbutton').addClass('upside-down', 150, 'linear');
+             }
+           });
 
-         $('#info-modal-trigger').leanModal();
-         $('#mm-holder-consent').hide();
+           $('#mm-holder-consent').hide();
 
-         // all links need to open in new tab.
-         $('a').each(function() {
-           var a = new RegExp('/' + window.location.host + '/');
-           if(!a.test(this.href)) {
-             $(this).click(function(event) {
-               event.preventDefault();
-               event.stopPropagation();
-               window.open(this.href, '_blank');
-             });
-           }
+           // all links need to open in new tab.
+           $('a').each(function() {
+             var a = new RegExp('/' + window.location.host + '/');
+             if(!a.test(this.href)) {
+               $(this).click(function(event) {
+                 event.preventDefault();
+                 event.stopPropagation();
+                 window.open(this.href, '_blank');
+               });
+             }
+           });
          });
 
          function ui_consent(consentVal) {

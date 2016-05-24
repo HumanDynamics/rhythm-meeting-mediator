@@ -1,8 +1,8 @@
 <head>
     <title>Breakout</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="<%= serverUrl %>/plugin/dist/css/style.css">
-    <link rel="stylesheet" type="text/css" href="<%= serverUrl %>/plugin/bower_components/materialize/bin/materialize.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+    <link rel="stylesheet" type="text/css" href="<%= serverUrl %>/plugin/dist/css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="<%= serverUrl %>/plugin/bower_components/materialize/bin/materialize.css"/>
 </head>
 <body>
     <nav>
@@ -10,8 +10,9 @@
             <a class="brand-logo" href="<%= serverUrl %>/breakout">Breakout</a>
             <ul class="right">
               <li>
-                <a id="info-modal-trigger" href="#info-modal" class="modal-trigger">
-                  <i class="small material-icons">info_outline</i>
+                  <button data-target="info-modal" class="btn modal-trigger">
+                      <i class="small material-icons">info_outline</i>
+                  </button>
                 </a>
               </li>
             </ul>
