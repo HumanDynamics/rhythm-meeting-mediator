@@ -1,21 +1,15 @@
-define(["config", "src/participantsRemovedCollector", "src/volumeCollector", "src/cameraCollector", "src/heartbeat", "src/charts", "src/consent", "feathers", "socketio", "underscore", "gapi", "jquery"],
-       function(config, participantsRemovedCollector, volumeCollector, cameraCollector, heartbeat, charts, consent, feathers, io, underscore, gapi, $) {
+define(["config", "src/participantsRemovedCollector", "src/volumeCollector", "src/cameraCollector", "src/charts", "src/consent", "feathers", "socketio", "underscore", "gapi", "jquery"],
+       function(config, participantsRemovedCollector, volumeCollector, cameraCollector, charts, consent, feathers, io, underscore, gapi, $) {
 
          // initialize global state object
          window.state = {};
          window.state.url = '<%= serverUrl %>';
          console.log("connecting to:", window.state.url);
 
-         // set up raw socket for custom events.
-         var socket = io(window.state.url, {
-           'transports': [
-             'websocket',
-             'flashsocket',
-             'htmlfile',
-             'xhr-polling',
-             'jsonp-polling'
-           ]
-         })
+    var api_key = null;
+    var app = null;
+    var socket = null;
+    var hangout = window.gapi.hangout;
 
          /////////////////////////////////////////////////////////////////////
          // UI stuff
@@ -77,15 +71,47 @@ define(["config", "src/participantsRemovedCollector", "src/volumeCollector", "sr
                         });
          }
 
-         var app = feathers()
-           .configure(feathers.hooks())
-           .configure(feathers.socketio(socket))
-
          // once the google api is ready...
          window.gapi.hangout.onApiReady.add(function(eventObj) {
+           var start_data = JSON.parse(hangout.getStartData());
+
+      // If there is not start data pull
+      // the apikey from the shared state
+      if (start_data == null) {
+        var state = hangout.data.getState();
+        api_key = state.apikey;
+      } else {
+        hangout.data.submitDelta(start_data);
+        api_key = start_data.apikey;
+      }
+
+      socket = io(window.state.url, {
+        'transports': [
+          'websocket',
+          'flashsocket',
+          'htmlfile',
+          'xhr-polling',
+          'jsonp-polling'
+        ]
+      })
+
+      app = feathers()
+        .configure(feathers.hooks())
+        .configure(feathers.socketio(socket))
+        .configure(feathers.authentication())
+
+      app.authenticate({
+        type: 'token',
+        'token': api_key
+      }).then(function(result) {
+        console.log('Authenticated!');
+      }).catch(function(error) {
+        console.error('Error authenticating!', error);
+      });
+
+
            console.log('hangout object:',  window.gapi.hangout);
-           var thisHangout = window.gapi.hangout;
-           console.log("hangoutId:", thisHangout.getHangoutId());
+           console.log("hangoutId:", hangout.getHangoutId());
 
            var participants = get_participant_objects(window.gapi.hangout.getParticipants());
 
@@ -93,24 +119,17 @@ define(["config", "src/participantsRemovedCollector", "src/volumeCollector", "sr
 
            volumeCollector.onParticipantsChanged(window.gapi.hangout.getParticipants());
 
-           var start_data = window.gapi.hangout.getStartData();
-
            socket.emit("meetingJoined",
                        {
                          participant: localParticipant.person.id,
                          name: localParticipant.person.displayName,
                          participant_locale: localParticipant.locale,
                          participants: participants,
-                         meeting: thisHangout.getHangoutId(),
-                         meetingTopic: thisHangout.getTopic(),
-                         meetingUrl: thisHangout.getHangoutUrl(),
+                         meeting: hangout.getHangoutId(),
+                         meetingTopic: hangout.getTopic(),
+                         meetingUrl: hangout.getHangoutUrl(),
                          meta: start_data
                        });
-
-           // the only other thing sent to maybe_start_heartbeat
-           // is a gapi onparticipantsChanged event, so just follow the format...
-           /* heartbeat.register_heartbeat(socket);
-              heartbeat.maybe_start_heartbeat([localParticipant]); */
 
            function process_consent(consentVal) {
              console.log("processing consent");
@@ -120,7 +139,7 @@ define(["config", "src/participantsRemovedCollector", "src/volumeCollector", "sr
              $('#no-consent-button').off('click.consent');
              if (consentVal === true) {
                addHangoutListeners();
-               charts.start_meeting_mediator(window.gapi, socket);
+               charts.start_meeting_mediator(app);
                ui_consent(consentVal);
                collection_consent(consentVal);
                $('#post-hoc-consent').off('click.consent');
@@ -137,7 +156,7 @@ define(["config", "src/participantsRemovedCollector", "src/volumeCollector", "sr
            setTimeout(function()  {
              consent.get_consent(socket,
                                  localParticipant.person.id,
-                                 thisHangout.getHangoutId(),
+                                 hangout.getHangoutId(),
                                  process_consent);
            }, 2000);
 
@@ -152,11 +171,7 @@ define(["config", "src/participantsRemovedCollector", "src/volumeCollector", "sr
 
          function addHangoutListeners() {
            console.log("adding hangout listeners...");
-           // start collecting volume data
            volumeCollector.startVolumeCollection(socket);
-
-           // start heartbeat listener
-           /* heartbeat.register_heartbeat(socket); */
 
            window.gapi.hangout.onParticipantsChanged.add(function(participantsChangedEvent) {
              console.log("participants changed:", participantsChangedEvent.participants);
