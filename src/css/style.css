@@ -79,6 +79,11 @@ a:active {
     padding-left: 0px;
 }
 
+#settings-info {
+    overflow-y: scroll;
+    max-height: 200px;
+}
+
 #upbutton {
     -ms-transform: rotate(90deg);/* IE 9 */
     -webkit-transform: rotate(90deg); /* Safari */
