@@ -51,19 +51,12 @@ define(["jquery", "feathers", "socketio", "underscore"], function($, feathers, i
   // Attempts to get consent from the user for this hangout.
   // cb is the callback to call, with a value of 'true' or 'false',
   // depending on whether or not the user has provided consent.
-  function getConsent(socket, participant_id, hangout_id, cb) {
-    socket = socket;
+  function getConsent(app, participant_id, hangout_id, cb) {
     participant_id = participant_id;
-    app = feathers().configure(feathers.socketio(socket));
     console.log('app:', app)
     participantService = app.service('participants');
 
-//    socket.emit('participants::get', participant_id, (error, participant) => {
-//      console.log('Found message', participant);
-//    });
-
     console.log("getting participant info for:", participant_id, hangout_id);
-
 
     participantService.get(participant_id,
                            {},

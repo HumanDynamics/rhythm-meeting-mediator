@@ -1,189 +1,209 @@
 define(["config", "src/participantsRemovedCollector", "src/volumeCollector", "src/cameraCollector", "src/heartbeat", "src/charts", "src/consent", "feathers", "socketio", "underscore", "gapi", "jquery"],
-       function(config, participantsRemovedCollector, volumeCollector, cameraCollector, heartbeat, charts, consent, feathers, io, underscore, gapi, $) {
+  function(config, participantsRemovedCollector, volumeCollector, cameraCollector, heartbeat, charts, consent, feathers, io, underscore, gapi, $) {
 
-         // initialize global state object
-         window.state = {};
-         window.state.url = '<%= serverUrl %>';
-         console.log("connecting to:", window.state.url);
+    // initialize global state object
+    window.state = {};
+    window.state.url = '<%= serverUrl %>';
+    console.log("connecting to:", window.state.url);
 
-         // set up raw socket for custom events.
-         var socket = io(window.state.url, {
-           'transports': [
-             'websocket',
-             'flashsocket',
-             'htmlfile',
-             'xhr-polling',
-             'jsonp-polling'
-           ]
-         })
+    var api_key = null;
+    var app = null;
+    var socket = null;
+    var hangout = window.gapi.hangout;
 
-         /////////////////////////////////////////////////////////////////////
-         // UI stuff
-         $(document).ready(function () {
-           $('#move-footer').click(function () {
-             console.log("clicked!");
-             if($('#footer').hasClass('slide-up')) {
-               $('#footer').addClass('slide-down', 150, 'linear');
-               $('#footer').removeClass('slide-up');
-               $('#upbutton').removeClass('upside-down', 150, 'linear');
-             } else {
-               $('#footer').removeClass('slide-down');
-               $('#footer').addClass('slide-up', 150, 'linear');
-               $('#upbutton').addClass('upside-down', 150, 'linear');
-             }
-           });
+    /////////////////////////////////////////////////////////////////////
+    // UI stuff
+    $(document).ready(function() {
+      $('#move-footer').click(function() {
+        console.log("clicked!");
+        if ($('#footer').hasClass('slide-up')) {
+          $('#footer').addClass('slide-down', 150, 'linear');
+          $('#footer').removeClass('slide-up');
+          $('#upbutton').removeClass('upside-down', 150, 'linear');
+        } else {
+          $('#footer').removeClass('slide-down');
+          $('#footer').addClass('slide-up', 150, 'linear');
+          $('#upbutton').addClass('upside-down', 150, 'linear');
+        }
+      });
 
-           $('#mm-holder-consent').hide();
+      $('#mm-holder-consent').hide();
 
-           // all links need to open in new tab.
-           $('a').each(function() {
-             var a = new RegExp('/' + window.location.host + '/');
-             if(!a.test(this.href)) {
-               $(this).click(function(event) {
-                 event.preventDefault();
-                 event.stopPropagation();
-                 window.open(this.href, '_blank');
-               });
-             }
-           });
-         });
+      // all links need to open in new tab.
+      $('a').each(function() {
+        var a = new RegExp('/' + window.location.host + '/');
+        if (!a.test(this.href)) {
+          $(this).click(function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            window.open(this.href, '_blank');
+          });
+        }
+      });
+    });
 
-         function ui_consent(consentVal) {
-           $('#consent-checkbox').prop('checked', consentVal);
-           if (consentVal == true) {
-             $('#mm-holder-consent').hide();
-           } else {
-             $('#mm-holder-consent').show();
-           }
+    function ui_consent(consentVal) {
+      $('#consent-checkbox').prop('checked', consentVal);
+      if (consentVal == true) {
+        $('#mm-holder-consent').hide();
+      } else {
+        $('#mm-holder-consent').show();
+      }
 
-         }
+    }
 
-         function collection_consent(consentVal) {
-           if (!consentVal) {
-             volumeCollector.consent = false;
-           } else {
-             volumeCollector.consent = true;
-           }
-         }
+    function collection_consent(consentVal) {
+      if (!consentVal) {
+        volumeCollector.consent = false;
+      } else {
+        volumeCollector.consent = true;
+      }
+    }
 
-         function get_participant_objects(participants) {
-           return _.map(participants,
-                        function(p) {
-                          return {
-                            participant: p.person.id,
-                            meeting: window.gapi.hangout.getHangoutId(),
-                            name: p.person.displayName,
-                            locale: p.locale,
-                          };
-                        });
-         }
+    function get_participant_objects(participants) {
+      return _.map(participants,
+        function(p) {
+          return {
+            participant: p.person.id,
+            meeting: hangout.getHangoutId(),
+            name: p.person.displayName,
+            locale: p.locale,
+          };
+        });
+    }
 
-         var app = feathers()
-           .configure(feathers.hooks())
-           .configure(feathers.socketio(socket))
 
-         // once the google api is ready...
-         window.gapi.hangout.onApiReady.add(function(eventObj) {
-           console.log('hangout object:',  window.gapi.hangout);
-           var thisHangout = window.gapi.hangout;
-           console.log("hangoutId:", thisHangout.getHangoutId());
+    // once the google api is ready...
+    hangout.onApiReady.add(function(eventObj) {
+      var start_data = JSON.parse(hangout.getStartData());
 
-           var participants = get_participant_objects(window.gapi.hangout.getParticipants());
+      // If there is not start data pull
+      // the apikey from the shared state
+      if (start_data == null) {
+        var state = hangout.data.getState();
+        api_key = state.apikey;
+      } else {
+        hangout.data.submitDelta(start_data);
+        api_key = start_data.apikey;
+      }
 
-           var localParticipant = window.gapi.hangout.getLocalParticipant();
+      socket = io(window.state.url, {
+        'transports': [
+          'websocket',
+          'flashsocket',
+          'htmlfile',
+          'xhr-polling',
+          'jsonp-polling'
+        ]
+      })
 
-           volumeCollector.onParticipantsChanged(window.gapi.hangout.getParticipants());
+      app = feathers()
+        .configure(feathers.hooks())
+        .configure(feathers.socketio(socket))
+        .configure(feathers.authentication())
 
-           var start_data = window.gapi.hangout.getStartData();
+      app.authenticate({
+        type: 'token',
+        'token': api_key
+      }).then(function(result) {
+        console.log('Authenticated!');
+      }).catch(function(error) {
+        console.error('Error authenticating!', error);
+      });
 
-           socket.emit("meetingJoined",
-                       {
-                         participant: localParticipant.person.id,
-                         name: localParticipant.person.displayName,
-                         participant_locale: localParticipant.locale,
-                         participants: participants,
-                         meeting: thisHangout.getHangoutId(),
-                         meetingTopic: thisHangout.getTopic(),
-                         meetingUrl: thisHangout.getHangoutUrl(),
-                         meta: start_data
-                       });
+      console.log('hangout object:', hangout);
+      console.log("hangoutId:", hangout.getHangoutId());
 
-           // the only other thing sent to maybe_start_heartbeat
-           // is a gapi onparticipantsChanged event, so just follow the format...
-           /* heartbeat.register_heartbeat(socket);
-              heartbeat.maybe_start_heartbeat([localParticipant]); */
+      var participants = get_participant_objects(hangout.getParticipants());
 
-           function process_consent(consentVal) {
-             console.log("processing consent");
-             // get rid of those stupid click events; if we
-             // don't, they will be called twice later... (god I hate jquery)
-             $('#consent-button').off('click.consent');
-             $('#no-consent-button').off('click.consent');
-             if (consentVal === true) {
-               addHangoutListeners();
-               charts.start_meeting_mediator(window.gapi, socket);
-               ui_consent(consentVal);
-               collection_consent(consentVal);
-               $('#post-hoc-consent').off('click.consent');
-               $('#consent-checkbox').off('change');
-               $('#consent-checkbox').prop('disabled', true);
-             } else {
-               console.log("didn't get consent from form...");
-               ui_consent(consentVal);
-               collection_consent(consentVal);
-               $('consent-checkbox').prop('disabled', false);
-             }
-           }
+      var localParticipant = hangout.getLocalParticipant();
 
-           setTimeout(function()  {
-             consent.get_consent(socket,
-                                 localParticipant.person.id,
-                                 thisHangout.getHangoutId(),
-                                 process_consent);
-           }, 2000);
+      volumeCollector.onParticipantsChanged(hangout.getParticipants());
 
-           $('#post-hoc-consent').on('click.consent', function(evt) {
-             consent.display_consent(process_consent);
-           });
+      var start_data = hangout.getStartData();
 
-           $('#consent-checkbox').on('change', function(evt) {
-             consent.display_consent(process_consent);
-           });
-         });
+      socket.emit("meetingJoined", {
+        participant: localParticipant.person.id,
+        name: localParticipant.person.displayName,
+        participant_locale: localParticipant.locale,
+        participants: participants,
+        meeting: hangout.getHangoutId(),
+        meetingTopic: hangout.getTopic(),
+        meetingUrl: hangout.getHangoutUrl(),
+        meta: start_data
+      });
 
-         function addHangoutListeners() {
-           console.log("adding hangout listeners...");
-           // start collecting volume data
-           volumeCollector.startVolumeCollection(socket);
+      function process_consent(consentVal) {
+        console.log("processing consent");
+        // get rid of those stupid click events; if we
+        // don't, they will be called twice later... (god I hate jquery)
+        $('#consent-button').off('click.consent');
+        $('#no-consent-button').off('click.consent');
+        if (consentVal === true) {
+          addHangoutListeners();
+          charts.start_meeting_mediator(window.gapi, app);
+          ui_consent(consentVal);
+          collection_consent(consentVal);
+          $('#post-hoc-consent').off('click.consent');
+          $('#consent-checkbox').off('change');
+          $('#consent-checkbox').prop('disabled', true);
+        } else {
+          console.log("didn't get consent from form...");
+          ui_consent(consentVal);
+          collection_consent(consentVal);
+          $('consent-checkbox').prop('disabled', false);
+        }
+      }
 
-           // start heartbeat listener
-           /* heartbeat.register_heartbeat(socket); */
+      setTimeout(function() {
+        consent.get_consent(app,
+          localParticipant.person.id,
+          hangout.getHangoutId(),
+          process_consent);
+      }, 2000);
 
-           window.gapi.hangout.onParticipantsChanged.add(function(participantsChangedEvent) {
-             console.log("participants changed:", participantsChangedEvent.participants);
-             var currentParticipants = _.map(_.filter(participantsChangedEvent.participants,
-                                                      function (p) { return p.hasAppEnabled }),
-                                             function (p) { return p.person.id })
+      $('#post-hoc-consent').on('click.consent', function(evt) {
+        consent.display_consent(process_consent);
+      });
 
-             // send the new participants to the volume collector, to reset volumes etc.
-             volumeCollector.onParticipantsChanged(participantsChangedEvent.participants);
+      $('#consent-checkbox').on('change', function(evt) {
+        consent.display_consent(process_consent);
+      });
+    });
 
-             console.log("sending:", currentParticipants);
-             const meetingService = app.service('meetings');
-             meetingService.patch(window.gapi.hangout.getHangoutId(), {
-               participants: currentParticipants // change to only participants with app
-             })
+    function addHangoutListeners() {
+      console.log("adding hangout listeners...");
+      volumeCollector.startVolumeCollection(app);
 
-             const participantEventService = app.service('participantEvents')
-             participantEventService.create({
-               meeting: window.gapi.hangout.getHangoutId(),
-               participants: _.pluck(currentParticipants, 'participant')
-             })
-           });
+      hangout.onParticipantsChanged.add(function(participantsChangedEvent) {
+        console.log("participants changed:", participantsChangedEvent.participants);
+        var currentParticipants = _.map(_.filter(participantsChangedEvent.participants,
+            function(p) {
+              return p.hasAppEnabled
+            }),
+          function(p) {
+            return p.person.id
+          })
 
-           volumeCollector.registerOnMicrophoneMuteListener(window.gapi, socket);
-           cameraCollector.registerOnCameraMuteListener(window.gapi, socket);
-           participantsRemovedCollector.registerOnParticipantsRemovedListener(window.gapi, app)
-         }
+        // send the new participants to the volume collector, to reset volumes etc.
+        volumeCollector.onParticipantsChanged(participantsChangedEvent.participants);
 
-       });
+        console.log("sending:", currentParticipants);
+        const meetingService = app.service('meetings');
+        meetingService.patch(hangout.getHangoutId(), {
+          participants: currentParticipants // change to only participants with app
+        })
+
+        const participantEventService = app.service('participantEvents')
+        participantEventService.create({
+          meeting: hangout.getHangoutId(),
+          participants: _.pluck(currentParticipants, 'participant')
+        })
+      });
+
+      volumeCollector.registerOnMicrophoneMuteListener(window.gapi, socket);
+      cameraCollector.registerOnCameraMuteListener(window.gapi, socket);
+      participantsRemovedCollector.registerOnParticipantsRemovedListener(window.gapi, app)
+    }
+
+  });
