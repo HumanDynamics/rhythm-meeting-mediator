@@ -130,3 +130,15 @@ a:active {
 #mm-holder-consent {
     display: none;
 }
+
+
+#mm-holder-error {
+    display: none;
+}
+
+.error-message {
+    font-size: .6em;
+    line-height: 1.2em;
+    margin-left: 10px;
+    margin-right: 10px;
+}

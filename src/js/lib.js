@@ -28,6 +28,7 @@ define(["config", "src/participantsRemovedCollector", "src/volumeCollector", "sr
       });
 
       $('#mm-holder-consent').hide();
+      $('#mm-holder-error').hide();
 
       // all links need to open in new tab.
       $('a').each(function() {
@@ -81,7 +82,11 @@ define(["config", "src/participantsRemovedCollector", "src/volumeCollector", "sr
       // the apikey from the shared state
       if (start_data == null) {
         var state = hangout.data.getState();
-        api_key = state.apikey;
+        if (_.has(state, 'apikey')) {
+          api_key = state.apikey;
+        } else {
+          $("#mm-holder-error").show();
+        }
       } else {
         hangout.data.submitDelta(start_data);
         api_key = start_data.apikey;

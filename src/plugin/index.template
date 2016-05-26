@@ -20,6 +20,13 @@
                  </p>
             </div>
         </div>
+        <div id="mm-holder-error" class="container center-align">
+          <div class="circle">
+            <h3>oops!</h3>
+            <p class="error-message"> Sorry! we've run into a problem! Enjoy your hangout,
+              or try restarting the conversation to use Breakout.</p>
+          </div>
+        </div>
     </div>
 
     <div class="card center-justified" id="footer">
