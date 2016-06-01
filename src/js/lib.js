@@ -3,7 +3,7 @@ define(["config", "src/participantsRemovedCollector", "src/volumeCollector", "sr
 
          // initialize global state object
          window.state = {};
-         window.state.url = 'https://breakout-dev.media.mit.edu';
+         window.state.url = '<%=serverUrl%>';
          console.log("connecting to:", window.state.url);
 
          var api_key = null;
