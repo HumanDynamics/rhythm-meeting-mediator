@@ -72,7 +72,7 @@ gulp.task('images', ['clean'], function () {
 gulp.task('s3', function () {
   gulp.src('./dist/**')
       .pipe(s3({
-        Bucket: 'rhythm-meeting-mediator',
+        Bucket: process.env.RHYTHM_MM_S3_BUCKET,
         ACL: 'public-read'
       }, {
         maxRetries: 5

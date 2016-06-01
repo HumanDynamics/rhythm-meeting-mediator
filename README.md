@@ -32,11 +32,12 @@ First, spin up a new Amazon S3 bucket, and enter this as the CORS configuration:
 pip install aws-cli
 ```
 
-2. create a .env file with the variables `RHYTHM_SERVER_URL` and `RHYTHM_MM_HOSTING_URL`:
+2. create a .env file with the variables `RHYTHM_SERVER_URL`, `RHYTHM_MM_HOSTING_URL`, and `RHYTHM_MM_S3_BUCKET`:
 
 ```
 RHYTHM_SERVER_URL=https://something.compute-1.amazonaws.com
 RHYTHM_MM_HOSTING_URL=https://s3.amazonaws.com/my-s3-bucket
+RHYTHM_MM_S3-BUCKET=my-s3-bucket
 ```
 
 where `RHYTHM_SERVER_URL` is a live [Rhythm Server](https://github.com/HumanDynamics/rhythm-server) instance.
