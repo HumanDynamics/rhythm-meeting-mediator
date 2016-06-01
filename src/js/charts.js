@@ -1,4 +1,4 @@
-define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", "underscore", "underscore_string"], function(pieChart, MM, feathers, _, s) {
+define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", "underscore", "underscore_string", "jquery"], function(pieChart, MM, feathers, _, s, $) {
 
   var mm = null;
   var mm_width = 300;
@@ -45,6 +45,10 @@ define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", 
 
   function start_meeting_mediator (gapi, app) {
     console.log('>> Starting meeting mediator...')
+
+    if (!($('#meeting-mediator').is(':empty'))) {
+      return
+    }
 
     var turns = app.service('turns')
     var participants = _.map(_.filter(gapi.hangout.getParticipants(),
