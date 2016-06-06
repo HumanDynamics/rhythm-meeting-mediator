@@ -113,8 +113,7 @@ define(["config", "src/participantsRemovedCollector", "src/volumeCollector", "sr
              type: 'token',
              'token': api_key
            }).then(function(result) {
-             console.log('Authenticated!', api_key);
-             console.log('hangout object:', hangout);
+             console.log("Authenticated!")
              console.log("hangoutId:", hangout.getHangoutId());
 
              var participants = get_participant_objects(hangout.getParticipants());
