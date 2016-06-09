@@ -23,16 +23,6 @@ requirejs.config({
 
     packages: [
         {
-            name: 'cs',
-            location: './bower_components/require-cs',
-            main: 'cs'
-        },
-        {
-            name: 'coffee-script',
-            location: './bower_components/coffeescript',
-            main: 'extras/coffee-script'
-        },
-        {
             name: 'text',
             location: './bower_components/requirejs-plugins/lib',
             main: 'text'

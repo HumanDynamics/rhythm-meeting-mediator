@@ -4,9 +4,10 @@ const concat = require('gulp-concat')
 const clean = require('gulp-clean')
 const imagemin = require('gulp-imagemin')
 const uglify = require('gulp-uglify')
-require('dotenv').config()
 const gutil = require('gulp-util')
+const coffee = require('gulp-coffee')
 const s3 = require('gulp-s3-upload')({useIAM: true})
+require('dotenv').config()
 
 var bases = {
   src: 'src/',
@@ -16,6 +17,7 @@ var bases = {
 var paths = {
   templates: ['plugin/header.xml', 'plugin/index.template', 'plugin/footer.xml'],
   js: ['js/**/*.js'],
+  coffee: ['js/**/*.coffee'],
   css: ['css/**/*.css'],
   images: ['images/**/*.png'],
   deps: ['bower_components/**']
@@ -47,10 +49,11 @@ gulp.task('js', ['clean'], function () {
       .pipe(uglify())
       .pipe(gulp.dest(bases.dist + 'js'))
 
-  gulp.src(bases.src + 'js/**/*.coffee')
-      .pipe(template({serverUrl: process.env.RHYTHM_SERVER_URL,
-                      hostingUrl: process.env.RHYTHM_MM_HOSTING_URL}))
-      .pipe(gulp.dest(bases.dist + 'js'))
+  gulp.src(bases.src + paths.coffee)
+          .pipe(template({serverUrl: process.env.RHYTHM_SERVER_URL,
+                          hostingUrl: process.env.RHYTHM_MM_HOSTING_URL}))
+          .pipe(coffee({bare: true}).on('error', gutil.log))
+          .pipe(gulp.dest(bases.dist + 'js'));
 })
 
 gulp.task('deps', ['clean'], function () {

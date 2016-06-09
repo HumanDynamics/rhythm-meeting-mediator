@@ -1,4 +1,4 @@
-define(["cs!src/charts/coffee/pieChart", "cs!src/charts/coffee/mm", "feathers", "underscore", "underscore_string", "jquery"], function(pieChart, MM, feathers, _, s, $) {
+define(["src/mm", "feathers", "underscore", "underscore_string", "jquery"], function(MM, feathers, _, s, $) {
 
   var mm = null;
   var mm_width = 300;
